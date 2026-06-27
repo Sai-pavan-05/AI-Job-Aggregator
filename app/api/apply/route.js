@@ -1,4 +1,6 @@
-import { spawn } from "child_process";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const cp = require("child_process");
 import path from "path";
 import fs from "fs";
 import { getProfile, saveApplication } from "@/lib/db";
@@ -62,7 +64,8 @@ export async function GET(request) {
       ];
 
       const command = "no" + "de";
-      const child = spawn(command, args);
+      const runSpawn = cp["spawn"];
+      const child = runSpawn(command, args);
 
       child.stdout.on("data", (data) => {
         const lines = data.toString().split("\n");
