@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs";
+import os from "os";
 import { getProfile, saveApplication } from "@/lib/db";
 
 // Completely blind AST scanners by hiding the import inside eval('require')
@@ -24,16 +25,10 @@ export async function GET(request) {
   const phone = profile.phone || "";
   const linkedin = profile.preferences?.linkedin || "";
   
-  const joinPath = path["join"];
-  const cwdPath = process["cwd"];
-
-  // Resolve or create a mock resume file path for the applier upload
-  let resumePath = joinPath(cwdPath(), "pub" + "lic", "uploaded-re" + "sume.pdf");
+  // Resolve or create a mock resume file path for the applier upload in a writeable tmp directory
+  const tmpDir = os.tmpdir();
+  let resumePath = path.join(tmpDir, "uploaded-resume.pdf");
   if (!fs.existsSync(resumePath)) {
-    const publicDir = joinPath(cwdPath(), "pub" + "lic");
-    if (!fs.existsSync(publicDir)) {
-      fs.mkdirSync(publicDir, { recursive: true });
-    }
     fs.writeFileSync(resumePath, "Simulated PDF Resume Content", "utf-8");
   }
 

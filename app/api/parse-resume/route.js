@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { saveProfile } from "@/lib/db";
 import fs from "fs";
 import path from "path";
+import os from "os";
 
 const DEFAULT_OLLAMA_MODEL = "llama3";
 
@@ -17,12 +18,9 @@ export async function POST(request) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     
-    // Save to public directory for playwright upload
-    const publicDir = path.join(process.cwd(), "public");
-    if (!fs.existsSync(publicDir)) {
-      fs.mkdirSync(publicDir, { recursive: true });
-    }
-    fs.writeFileSync(path.join(publicDir, "uploaded-resume.pdf"), buffer);
+    // Save to writeable tmp directory for playwright upload
+    const tmpDir = os.tmpdir();
+    fs.writeFileSync(path.join(tmpDir, "uploaded-resume.pdf"), buffer);
 
     let rawText = "";
 

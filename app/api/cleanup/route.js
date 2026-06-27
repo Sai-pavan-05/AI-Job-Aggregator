@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import os from "os";
 import { clearAllData } from "@/lib/db";
 
 export async function POST() {
@@ -8,8 +9,9 @@ export async function POST() {
     // 1. Clear DB records (Supabase and local JSON database file)
     await clearAllData();
 
-    // 2. Clear uploaded resume file
-    const resumePath = path.join(process.cwd(), "public", "uploaded-resume.pdf");
+    // 2. Clear uploaded resume file in writeable tmp directory
+    const tmpDir = os.tmpdir();
+    const resumePath = path.join(tmpDir, "uploaded-resume.pdf");
     if (fs.existsSync(resumePath)) {
       try {
         fs.unlinkSync(resumePath);
