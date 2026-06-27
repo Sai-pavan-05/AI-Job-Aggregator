@@ -1,0 +1,17 @@
+Jane Doe
+jane.doe@example.com
++1 (555) 019-2834
+LinkedIn: https://linkedin.com/in/janedoe
+
+Education:
+- B.S. in Computer Science, Stanford University (2019)
+
+Experience:
+- Senior Software Engineer, Tech Giant Inc (2021 - Present)
+  * Led a team of 4 engineers to rebuild the core data ingestion pipeline, reducing latency by 40%
+  * Implemented LLM-based search indexing that improved click-through-rate by 15%
+- Software Engineer, Startup Co (2019 - 2021)
+  * Developed key dashboard features using React, TailwindCSS and Node.js
+
+Skills:
+JavaScript, React, Node.js, Python, Supabase, PostgreSQL, Tailwind CSS, Playwright, Docker
