@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
-import pdfParse from "pdf-parse";
 import { saveProfile } from "@/lib/db";
 import fs from "fs";
 import path from "path";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse");
 
 const DEFAULT_OLLAMA_MODEL = "llama3";
 

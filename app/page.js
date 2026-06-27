@@ -197,7 +197,7 @@ export default function Home() {
       const data = await res.json();
       if (data.success) {
         setProfile(data.profile);
-        setJobs(data.jobs);
+        loadData();
         showNotification("Preferences updated! Refreshing filtered job list.", "success");
         setActiveTab("dashboard");
       } else {
@@ -567,14 +567,14 @@ export default function Home() {
                 </div>
 
                 <div className="space-y-4 max-h-[460px] overflow-y-auto pr-1">
-                  {jobs.length === 0 ? (
+                  {(jobs || []).length === 0 ? (
                     <div className="text-center py-12 border border-dashed border-gray-800 rounded-lg">
                       <Briefcase className="w-10 h-10 text-gray-600 mx-auto mb-2" />
                       <span className="text-sm text-gray-400 block font-bold">No jobs match your location/work preferences</span>
                       <span className="text-xs text-gray-600 mt-1 block">Adjust preferences in the settings tab</span>
                     </div>
                   ) : (
-                    jobs.map((job) => (
+                    (jobs || []).map((job) => (
                       <div 
                         key={job.id} 
                         className={`p-4 rounded-lg bg-gray-950/40 border transition-all ${
