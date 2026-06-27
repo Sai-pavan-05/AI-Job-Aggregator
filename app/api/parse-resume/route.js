@@ -3,13 +3,13 @@ import { saveProfile } from "@/lib/db";
 import fs from "fs";
 import path from "path";
 
-const DEFAULT_OLLAMA_MODEL = "llama3";
+const DEFAULT_MODEL = "google/gemini-2.5-flash";
 
 export async function POST(request) {
   try {
     const formData = await request.formData();
     const file = formData.get("resume");
-    const model = formData.get("model") || DEFAULT_OLLAMA_MODEL;
+    const model = formData.get("model") || DEFAULT_MODEL;
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -48,12 +48,12 @@ export async function POST(request) {
     }
 
     let parsedJson = null;
-    let ollamaUsed = false;
-    let ollamaError = "";
+    let openRouterUsed = false;
+    let openRouterError = "";
 
-    // Attempt to parse using local Ollama instance
+    // Attempt to parse using OpenRouter API
     try {
-      const prompt = `You are a resume parsing assistant. Analyze the raw resume text provided below and output a structured JSON object. 
+      const prompt = `Analyze the raw resume text provided below and output a structured JSON object. 
 The JSON object MUST follow this schema:
 {
   "name": "Full Name",
@@ -74,33 +74,47 @@ RAW RESUME TEXT:
 ${rawText}`;
 
       const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 12000); // 12s timeout for Ollama quick response
+      const id = setTimeout(() => controller.abort(), 15000); // 15s timeout for OpenRouter quick response
 
-      const ollamaRes = await fetch("http://localhost:11434/api/generate", {
+      const openRouterRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          "HTTP-Referer": "https://your-domain.vercel.app", 
+          "X-Title": "Resume Parser App",
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           model: model,
-          prompt: prompt,
-          format: "json",
-          stream: false,
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert technical resume screening assistant. Analyze the provided resume text and extract key skills, work history, and a performance summary.",
+            },
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          response_format: { type: "json_object" }
         }),
         signal: controller.signal,
       });
 
       clearTimeout(id);
 
-      if (ollamaRes.ok) {
-        const resData = await ollamaRes.json();
-        const responseText = resData.response;
+      if (openRouterRes.ok) {
+        const resData = await openRouterRes.json();
+        const responseText = resData.choices[0].message.content;
         parsedJson = JSON.parse(responseText.trim());
-        ollamaUsed = true;
+        openRouterUsed = true;
       } else {
-        ollamaError = `Ollama HTTP Status ${ollamaRes.status}`;
+        const errorData = await openRouterRes.json().catch(() => ({}));
+        openRouterError = errorData.error?.message || `OpenRouter HTTP Status ${openRouterRes.status}`;
       }
     } catch (err) {
-      ollamaError = err.message || "Connection refused";
-      console.warn("Ollama connection failed, using local parsing simulation fallback.");
+      openRouterError = err.message || "Connection refused";
+      console.warn("OpenRouter connection failed, using local parsing simulation fallback.");
     }
 
     // Fallback Mock Parser if Ollama is not running/errors
@@ -161,8 +175,8 @@ ${rawText}`;
 
     return NextResponse.json({
       success: true,
-      ollamaUsed,
-      ollamaError,
+      openRouterUsed,
+      openRouterError,
       profile,
     });
 

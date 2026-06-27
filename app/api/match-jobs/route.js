@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { getProfile, getJobs, saveJobs } from "@/lib/db";
 
-const DEFAULT_OLLAMA_MODEL = "llama3";
+const DEFAULT_MODEL = "google/gemini-2.5-flash";
 
 export async function POST(request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const model = body.model || DEFAULT_OLLAMA_MODEL;
+    const model = body.model || DEFAULT_MODEL;
 
     const profile = await getProfile();
     const jobs = await getJobs();
@@ -19,13 +19,13 @@ export async function POST(request) {
     const candidateSummary = `${profile.resumeJson.name}. Skills: ${candidateSkills.join(", ")}. Experience: ${JSON.stringify(profile.resumeJson.experience)}`;
 
     const updatedJobs = [];
-    let ollamaUsed = false;
-    let ollamaErrorsCount = 0;
+    let openRouterUsed = false;
+    let openRouterErrorsCount = 0;
 
     for (const job of jobs) {
       let matchResult = null;
 
-      // Try Ollama matching
+      // Try OpenRouter matching
       try {
         const prompt = `You are an expert technical recruiter. Compare this candidate's Resume Profile against the Job Description. 
 You must output a JSON object containing:
@@ -43,32 +43,45 @@ ${job.description}
 Do not include any chat formatting, introductory text, or markdown code blocks. Output ONLY the JSON object.`;
 
         const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), 6000); // 6s timeout per job to prevent long blocking
+        const id = setTimeout(() => controller.abort(), 10000); // 10s timeout per job to prevent long blocking
 
-        const ollamaRes = await fetch("http://localhost:11434/api/generate", {
+        const openRouterRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            "HTTP-Referer": "https://your-domain.vercel.app", 
+            "X-Title": "Resume Parser App",
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             model: model,
-            prompt: prompt,
-            format: "json",
-            stream: false,
+            messages: [
+              {
+                role: "system",
+                content: "You are an expert technical recruiter. Analyze and match the candidate profile to the job description, outputting only the JSON format required.",
+              },
+              {
+                role: "user",
+                content: prompt,
+              },
+            ],
+            response_format: { type: "json_object" }
           }),
           signal: controller.signal,
         });
 
         clearTimeout(id);
 
-        if (ollamaRes.ok) {
-          const resData = await ollamaRes.json();
-          const responseText = resData.response;
+        if (openRouterRes.ok) {
+          const resData = await openRouterRes.json();
+          const responseText = resData.choices[0].message.content;
           matchResult = JSON.parse(responseText.trim());
-          ollamaUsed = true;
+          openRouterUsed = true;
         } else {
-          ollamaErrorsCount++;
+          openRouterErrorsCount++;
         }
       } catch (err) {
-        ollamaErrorsCount++;
+        openRouterErrorsCount++;
       }
 
       // Local Regex-based Matcher Fallback
@@ -140,8 +153,8 @@ Do not include any chat formatting, introductory text, or markdown code blocks. 
 
     return NextResponse.json({
       success: true,
-      ollamaUsed,
-      ollamaErrorsCount,
+      openRouterUsed,
+      openRouterErrorsCount,
       jobs: updatedJobs
     });
 

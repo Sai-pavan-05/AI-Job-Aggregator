@@ -33,7 +33,7 @@ export default function Home() {
   const [isMatching, setIsMatching] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
   const [activeJobApplying, setActiveJobApplying] = useState(null);
-  const [selectedModel, setSelectedModel] = useState("llama3");
+  const [selectedModel, setSelectedModel] = useState("google/gemini-2.5-flash");
   const [showScreenshotModal, setShowScreenshotModal] = useState(false);
   const [screenshotUrl, setScreenshotUrl] = useState("");
   const [screenshotTitle, setScreenshotTitle] = useState("");
@@ -103,7 +103,7 @@ export default function Home() {
     if (!file) return;
 
     setIsParsing(true);
-    showNotification("Uploading and parsing resume PDF using Ollama...", "info");
+    showNotification("Uploading and parsing resume PDF using OpenRouter...", "info");
 
     const formData = new FormData();
     formData.append("resume", file);
@@ -120,9 +120,9 @@ export default function Home() {
         setProfile(data.profile);
         setPhoneInput(data.profile.phone || "");
         showNotification(
-          data.ollamaUsed 
-            ? "Resume parsed successfully using local Ollama model!" 
-            : "Resume parsed successfully (simulated fallback, Ollama offline).", 
+          data.openRouterUsed 
+            ? "Resume parsed successfully using OpenRouter AI!" 
+            : "Resume parsed successfully (simulated fallback, OpenRouter offline).", 
           "success"
         );
       } else {
@@ -157,9 +157,9 @@ export default function Home() {
       if (data.success) {
         setJobs(data.jobs);
         showNotification(
-          data.ollamaUsed 
+          data.openRouterUsed 
             ? "AI Job matching scores and skills gaps calculated!" 
-            : "Job matching scores calculated (local fallback, Ollama offline).", 
+            : "Job matching scores calculated (simulated fallback, OpenRouter offline).", 
           "success"
         );
       } else {
@@ -327,7 +327,7 @@ export default function Home() {
                 AEROAPPLY
               </span>
               <span className="text-[10px] text-cyan-400 font-bold ml-1.5 uppercase tracking-widest bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
-                Ollama local
+                OpenRouter AI
               </span>
             </div>
           </div>
@@ -400,7 +400,7 @@ export default function Home() {
                       <div className="flex flex-col items-center py-4">
                         <Activity className="w-10 h-10 text-cyan-400 animate-pulse mb-3" />
                         <span className="text-sm font-bold text-cyan-400">Parsing Resume PDF...</span>
-                        <span className="text-xs text-gray-500 mt-1">Calling Ollama structured generation</span>
+                        <span className="text-xs text-gray-500 mt-1">Calling OpenRouter structured generation</span>
                       </div>
                     ) : (
                       <>
@@ -470,16 +470,16 @@ export default function Home() {
 
                 {/* Model selector dropdown */}
                 <div className="mt-5 pt-4 border-t border-gray-800 flex items-center justify-between gap-4">
-                  <span className="text-xs font-semibold text-gray-400">Ollama model:</span>
+                  <span className="text-xs font-semibold text-gray-400">OpenRouter model:</span>
                   <select 
                     value={selectedModel}
                     onChange={(e) => setSelectedModel(e.target.value)}
                     className="bg-gray-950 border border-gray-800 rounded px-2.5 py-1 text-xs font-mono text-white focus:outline-none focus:border-violet-500"
                   >
-                    <option value="llama3">llama3</option>
-                    <option value="mistral">mistral</option>
-                    <option value="llama3.1">llama3.1</option>
-                    <option value="codellama">codellama</option>
+                    <option value="google/gemini-2.5-flash">google/gemini-2.5-flash</option>
+                    <option value="google/gemini-2.5-pro">google/gemini-2.5-pro</option>
+                    <option value="meta-llama/llama-3-8b-instruct">meta-llama/llama-3-8b-instruct</option>
+                    <option value="deepseek/deepseek-chat">deepseek/deepseek-chat</option>
                   </select>
                 </div>
               </div>
