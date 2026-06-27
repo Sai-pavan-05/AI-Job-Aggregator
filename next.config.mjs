@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  outputFileTracingIncludes: {
-    '/api/apply': ['./sc' + 'ri' + 'pts/**/*'],
-  },
+  /* config options here */
 };
 
 export default nextConfig;
