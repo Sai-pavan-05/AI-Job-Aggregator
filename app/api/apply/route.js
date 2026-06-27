@@ -93,7 +93,7 @@ export async function GET(request) {
         
         const folderName = "sc" + "ri" + "pts";
         const fileName = "ap" + "ply-b" + "ot.js";
-        const scriptPath = joinPath(cwdPath(), folderName, fileName);
+        const scriptPath = path.join(process.cwd(), folderName, fileName);
         const args = [
           scriptPath,
           `--url=${url}`,
