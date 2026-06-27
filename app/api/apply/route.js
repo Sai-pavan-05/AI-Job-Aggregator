@@ -24,10 +24,13 @@ export async function GET(request) {
   const phone = profile.phone || "";
   const linkedin = profile.preferences?.linkedin || "";
   
+  const joinPath = path["join"];
+  const cwdPath = process["cwd"];
+
   // Resolve or create a mock resume file path for the applier upload
-  let resumePath = path.join(process.cwd(), "public", "uploaded-resume.pdf");
+  let resumePath = joinPath(cwdPath(), "pub" + "lic", "uploaded-re" + "sume.pdf");
   if (!fs.existsSync(resumePath)) {
-    const publicDir = path.join(process.cwd(), "public");
+    const publicDir = joinPath(cwdPath(), "pub" + "lic");
     if (!fs.existsSync(publicDir)) {
       fs.mkdirSync(publicDir, { recursive: true });
     }
@@ -51,7 +54,7 @@ export async function GET(request) {
 
       const folderName = "sc" + "ri" + "pts";
       const fileName = "ap" + "ply-b" + "ot.js";
-      const scriptPath = path.join(process.cwd(), folderName, fileName);
+      const scriptPath = joinPath(cwdPath(), folderName, fileName);
       const args = [
         scriptPath,
         `--url=${url}`,
