@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import os from "os";
 import { clearAllData } from "@/lib/db";
 
 export async function POST() {
@@ -10,7 +9,7 @@ export async function POST() {
     await clearAllData();
 
     // 2. Clear uploaded resume file in writeable tmp directory
-    const tmpDir = os.tmpdir();
+    const tmpDir = process.env.VERCEL ? "/tmp" : path.join(process.cwd(), "public");
     const resumePath = path.join(tmpDir, "uploaded-resume.pdf");
     if (fs.existsSync(resumePath)) {
       try {

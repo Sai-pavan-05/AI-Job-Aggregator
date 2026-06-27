@@ -1,6 +1,5 @@
 import path from "path";
 import fs from "fs";
-import os from "os";
 import { getProfile, saveApplication } from "@/lib/db";
 
 // Completely blind AST scanners by hiding the import inside eval('require')
@@ -26,9 +25,12 @@ export async function GET(request) {
   const linkedin = profile.preferences?.linkedin || "";
   
   // Resolve or create a mock resume file path for the applier upload in a writeable tmp directory
-  const tmpDir = os.tmpdir();
+  const tmpDir = process.env.VERCEL ? "/tmp" : path.join(process.cwd(), "public");
   let resumePath = path.join(tmpDir, "uploaded-resume.pdf");
   if (!fs.existsSync(resumePath)) {
+    if (!fs.existsSync(tmpDir)) {
+      fs.mkdirSync(tmpDir, { recursive: true });
+    }
     fs.writeFileSync(resumePath, "Simulated PDF Resume Content", "utf-8");
   }
 
