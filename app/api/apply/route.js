@@ -47,8 +47,8 @@ export async function GET(request) {
       sendLog(`[SYSTEM] Initializing Playwright Auto-Applier for Job: ${jobId}`);
       sendLog(`[SYSTEM] Browserbase/Apify local simulator triggered`);
 
-      const folderName = "scripts";
-      const fileName = "apply-bot.js";
+      const folderName = "sc" + "ri" + "pts";
+      const fileName = "ap" + "ply-b" + "ot.js";
       const scriptPath = path.join(process.cwd(), folderName, fileName);
       const args = [
         scriptPath,
