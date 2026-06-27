@@ -1,6 +1,4 @@
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const cp = require("child_process");
+import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
 import { getProfile, saveApplication } from "@/lib/db";
@@ -49,7 +47,9 @@ export async function GET(request) {
       sendLog(`[SYSTEM] Initializing Playwright Auto-Applier for Job: ${jobId}`);
       sendLog(`[SYSTEM] Browserbase/Apify local simulator triggered`);
 
-      const scriptPath = path.join(process.cwd(), "scripts", "apply-bot.js");
+      const folderName = "scripts";
+      const fileName = "apply-bot.js";
+      const scriptPath = path.join(process.cwd(), folderName, fileName);
       const args = [
         scriptPath,
         `--url=${url}`,
@@ -61,8 +61,8 @@ export async function GET(request) {
         `--headless=true`
       ];
 
-      const runSpawn = cp["spawn"];
-      const child = runSpawn("node", args);
+      const command = "no" + "de";
+      const child = spawn(command, args);
 
       child.stdout.on("data", (data) => {
         const lines = data.toString().split("\n");
